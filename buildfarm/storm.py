@@ -37,6 +37,11 @@ import urllib2
 import json
 import time
 
+try:
+  from urllib.error import URLError  # Python 3
+except NameError:
+  from urllib2 import URLError       # Python 2
+
 pending_status_identifiers = ['Building', 'Building (Pending)',
                               'Created', 'Booting', 'Provisioning',
                               'Shutdown']  # Shutdown is a hack #FIXME #TODO
@@ -151,7 +156,7 @@ class StormAPI:
         jsondump = json.dumps(values)
         try:
             request = urllib2.Request(url, jsondump)
-        except URLError, ex:
+        except URLError as ex:
             print "Failed to get url %s with exception %s" % (url, ex)
             return None
         response = self.open(request)
@@ -160,7 +165,7 @@ class StormAPI:
             if 'status' in d:
             #print "status", d['status']
                 return d['status']
-        except URLError, ex:
+        except URLError as ex:
             print "URLError, ex"
         return None
 
@@ -226,7 +231,7 @@ class StormAPI:
             s = unreached_servers[index]
             try:
                 status = self.storm_server_status(s)
-            except urllib2.URLError as e:
+            except URLError as e:
                 print " Failed to poll status continuing anyway. [%s]" % e
             print 'polled server %s: %s' % (s, status)
             if status == 'Running':
